@@ -60,13 +60,13 @@ class Message(object):
 
     def deposit(self, rec_file):
         try:
-            os.rename(rec_file, self.file)
+            os.rename(rec_file, self.file())
         except OSError as e:
             print 'Move failed'
             raise e
 
-    def file ():
-        return os.path.join(directory, '%s.%s' % (self.msg_key, RECORD_FORMAT))
+    def file(self):
+        return os.path.join(self.directory, '%s.%s' % (self.msg_key, RECORD_FORMAT))
 
     #def __str__(self):
     #    return self.msg_key
@@ -128,26 +128,26 @@ class Mailbox(object):
     def delete_message(self, msg):
         # Normally deletion happens from saved messages, so test that first.
         if msg in self.saved_msgs:
-            os.remove(msg.file)
+            os.remove(msg.file())
             self.saved_msgs.remove(msg)
         elif msg in self.new_msgs:
-            os.remove(msg.file)
+            os.remove(msg.file())
             self.new_msgs.remove(msg)
 
     def message_read(self, msg):
         if msg in self.new_msgs:
-            new_msg_file = msg.file
+            new_msg_file = msg.file()
             msg.directory = self.saved_msg_directory
-            os.rename(new_msg_file, msg.file)
+            os.rename(new_msg_file, msg.file())
             self.new_msgs.remove(msg)
             self.saved_msgs.append(msg)
             self.saved_msgs.sort(key=lambda x: x.received)
 
     def message_unread(self, msg):
         if msg in self.saved_msgs:
-            saved_msg_file = msg.file
+            saved_msg_file = msg.file()
             msg.directory = self.new_msg_directory
-            os.rename(saved_msg_file, msg.file)
+            os.rename(saved_msg_file, msg.file())
             self.saved_msgs.remove(msg)
             self.new_msgs.append(msg)
             self.new_msgs.sort(key=lambda x: x.received)
@@ -176,7 +176,7 @@ def play_message(response, mailbox, list, time, msg):
         method='GET'
     )
     getdigits.addSpeak(body=msg.description())
-    getdigits.addPlay(msg.file)
+    getdigits.addPlay(msg.file())
     getdigits.addSpeak(body="Press 2 to repeat, 3 to delete, 6 to skip, 7 to save")
 
 def play_menu(response, mailbox):
